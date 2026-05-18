@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<meta charset="UTF-8">
+<title>Clock</title>
+
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #121212;
+        color: #1af534;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    #clock {
+        font-size: 70px;
+        letter-spacing: 3px;
+    }
+
+    #date {
+        font-size: 30px;
+        margin-top: 10px;
+    }
+
+    .event {
+    margin-top: 20px;
+    font-size: 28px;
+    color: #1af534;
+    }
+
+</style>
+</head>
+
+<body>
+    
+<div id="date">-- -- ----</div>
+<div id="clock">00:00:00</div>
+
+<div id="event" class="event"></div>
+<div id="event2" class="event"></div>
+<div id="event3" class="event"></div>
+<div id="event4" class="event"></div>
+<div id="event5." class="event">Fin de la journée dans :</div>
+<div id="event5" class="event"></div>
+<div class="event">Fin de la semaine dans :</div>
+<div id="event6" class="event"></div>
+
+<script>
+// =========================
+//  CALCUL SEMAINE A / B
+// =========================
+function getWeekType() {
+    const start = new Date(2024, 8, 2); // semaine A de référence
+    const now = new Date();
+    const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24 * 7));
+    return diff % 2 === 0 ? "a" : "b";
+}
+
+// =========================
+//  EMPLOI DU TEMPS
+// =========================
+const schedule = {
+    "Lundi": [
+        { start: "08:00", end: "09:55", text: "Physique (A570)" },
+        { start: "10:10", end: "11:05", text: "Culture G (G612)" },
+        { start: "13:10", end: "13:40", text: "Informatique M (A520)" },
+        {
+            start: "13:40", end: "15:05",
+            textA: "Informatique Br (A503)",
+            textB: "Informatique M (A520)"
+        },
+        {
+            start: "15:15", end: "16:10",
+            textA: "Informatique Br (A503)",
+            textB: "Informatique M (A520)"
+        }
+    ],
+    "Mardi": [
+        { start: "08:00", end: "08:55", text: "Physique (A567)" },
+        { start: "09:00", end: "09:55", text: "Math (C302)" },
+        { start: "10:10", end: "12:05", text: "Culture G (A412)" },
+        { start: "13:10", end: "13:40", text: "Informatique M (A520)" },
+        {
+            start: "13:40", end: "15:05",
+            textA: "Informatique M (A520)",
+            textB: "Informatique Be (A503)"
+        },
+        {
+            start: "15:15", end: "16:10",
+            textA: "Informatique M (A520)",
+            textB: "Informatique Be (A503)"
+        }
+    ],
+    "Mercredi": [
+        { start: "08:00", end: "08:55", text: "Anglais spécial (A520)" },
+        { start: "09:00", end: "09:55", text: "AP disciplinaire (A520)" },
+        { start: "10:10", end: "12:05", text: "Physique (A566)" },
+        { start: "12:10", end: "13:05", text: "Co-math (A520)" },
+        { start: "14:10", end: "15:05", text: "Anglais (G605)" },
+        { start: "15:15", end: "16:10", text: "Math (C502)" }
+    ],
+    "Jeudi": [
+        { start: "08:00", end: "08:55", text: "Physique (A567)" },
+        { start: "09:00", end: "09:30", text: "Informatique Br (A520)" },
+        { start: "09:30", end: "09:55", text: "Informatique Br (A520)" },
+        { start: "10:10", end: "12:05", text: "Informatique Br (A520)" },
+        { start: "12:10", end: "13:05", text: "AP math (C302)" },
+        { start: "14:10", end: "15:05", text: "Anglais (C207)" }
+    ],
+    "Vendredi": [
+        { start: "09:00", end: "09:30", text: "Informatique Be (A520)" },
+        { start: "09:30", end: "09:55", text: "Informatique Be (A503)" },
+        { start: "10:10", end: "12:05", text: "Informatique Be (A503)" },
+        { start: "12:10", end: "13:05", text: "Physique (A567)" }
+    ]
+};
+
+// =========================
+//  OUTILS TEMPS
+// =========================
+function timeToSeconds(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 3600 + m * 60;
+}
+
+function formatTime(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+}
+
+function secondsUntilEndOfWeek(now) {
+    const day = now.getDay(); // 0 = dimanche, 5 = vendredi
+    const daysUntilFriday = (5 - day + 7) % 7;
+
+    const endOfWeek = new Date(now);
+    endOfWeek.setDate(now.getDate() + daysUntilFriday);
+    endOfWeek.setHours(13, 05, 0); // vendredi fin des cours
+
+    return Math.max(0, Math.floor((endOfWeek - now) / 1000));
+}
+
+// =========================
+//  LOGIQUE PRINCIPALE
+// =========================
+function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, "0");
+    const m = String(now.getMinutes()).padStart(2, "0");
+    const s = String(now.getSeconds()).padStart(2, "0");
+
+    const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    const mois = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
+    const jourNom = jours[now.getDay()];
+    const moisNom = mois[now.getMonth()];
+    const annee = now.getFullYear();
+
+    document.getElementById("clock").textContent = `${h}:${m}:${s}`;
+    document.getElementById("date").textContent = `${jourNom} ${now.getDate()} ${moisNom} ${annee}`;
+
+    updateSchedule(jourNom, now);
+}
+
+// =========================
+//  COURS + PROCHAIN COURS
+// =========================
+function updateSchedule(jourNom, now) {
+    const zone = document.getElementById("event");
+    const zone2 = document.getElementById("event2");
+    const zone3 = document.getElementById("event3");
+    const zone4 = document.getElementById("event4");
+    const zone5 = document.getElementById("event5");
+    const zone6 = document.getElementById("event6");
+
+    
+    const week = getWeekType();
+    const nowSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+    if (!schedule[jourNom]) {
+        zone.textContent = "Pas de cours aujourd'hui";
+        zone2.textContent = "";
+        zone3.textContent = "";
+        zone4.textContent = "";
+        return;
+    }
+
+    let current = null;
+    let next = null;
+
+    for (const c of schedule[jourNom]) {
+        const startSeconds = timeToSeconds(c.start);
+        const endSeconds = timeToSeconds(c.end);
+
+        if (nowSeconds >= startSeconds && nowSeconds < endSeconds) {
+            current = c;
+        }
+
+        if (startSeconds > nowSeconds && next === null) {
+            next = c;
+        }
+    }
+
+    // ----- afficher cours actuel -----
+    if (current) {
+        const text = current.textA && current.textB
+            ? (week === "a" ? current.textA : current.textB)
+            : current.text;
+
+        const remainingSeconds = timeToSeconds(current.end) - nowSeconds;
+        zone.textContent = "Cours en cours : " + text;
+        zone2.textContent = "Fin dans : " + formatTime(remainingSeconds);
+    } else {
+        zone.textContent = "Pas de cours en ce moment 🎉";
+        zone2.textContent = "";
+    }
+
+    // ----- afficher prochain cours -----
+    if (next) {
+        const text = next.textA && next.textB
+            ? (week === "a" ? next.textA : next.textB)
+            : next.text;
+
+        const remainingSeconds = timeToSeconds(next.start) - nowSeconds;
+        zone3.textContent = "Prochain cours : " + text;
+        zone4.textContent = "Dans : " + formatTime(remainingSeconds);
+    } else {
+        zone3.textContent = "Pas de prochain cours 🎉";
+        zone4.textContent = "";
+    }
+    // ----- fin de la journée (dernier cours) -----
+    const daySchedule = schedule[jourNom];
+
+    if (daySchedule && daySchedule.length > 0) {
+        const lastCourse = daySchedule[daySchedule.length - 1];
+        const endSeconds = timeToSeconds(lastCourse.end);
+        const remaining = endSeconds - nowSeconds;
+
+    if (remaining > 0) {
+        zone5.textContent = formatTime(remaining);
+    } else {
+        zone5.textContent = "Journée terminée 🎉";
+    }
+    } else {
+        zone5.textContent = "Pas de cours aujourd'hui";
+    }
+
+    // ----- fin de la semaine -----
+    const endWeekSeconds = secondsUntilEndOfWeek(now);
+    zone6.textContent = formatTime(endWeekSeconds);
+    if (endWeekSeconds === 0){
+        zone6.textContent = "Semaine terminée 🎉"
+    }
+}
+
+// =========================
+// LANCEMENT
+// =========================
+setInterval(updateClock, 100);
+updateClock();
+</script>
+
+</body>
+</html>
+
+<things to add : time before vacation, part where it doesn't show anything when i'm on vacation>
+
+<https://htmlcolorcodes.com/fr/>
+<https://www.nuancier.net/hex/fa4420/>
+<good colors : 067f26, 0609c7, 6b01db, 02991e, b02600, 11d9f4, 1af534, FF0000, D4AF37, C0C0C0, 800020, >
+<actual colors:dgreen, dblue , purple, green , dred  , cyan  , lgreen, red   , gold  , silver,redblue, >
+
