@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Clock & Video Player</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Patrick+Hand&family=Fira+Code&family=Bangers&family=Press+Start+2P&family=VT323&family=Creepster&family=Playfair+Display:ital,wght@0,700;1,700&family=MedievalSharp&display=swap');
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+            background: #121212;
+            color: #1af534;
+            font-family: "Segoe UI", sans-serif;
+            transition: 0.3s;
+            overflow-y: auto;
+        }
+
+        /* Font Classes */
+        .font-default { font-family: "Segoe UI", sans-serif; }
+        .font-sci-fi { font-family: "Orbitron", sans-serif; }
+        .font-hand { font-family: "Patrick Hand", cursive; }
+        .font-retro { font-family: "Press Start 2P", system-ui; font-size: 0.8em; }
+        .font-comic { font-family: "Bangers", system-ui; letter-spacing: 2px; }
+        .font-mono { font-family: "Fira Code", monospace; }
+        .font-hacker { font-family: "VT323", monospace; font-size: 1.2em; }
+        .font-horror { font-family: "Creepster", system-ui; }
+        .font-fancy { font-family: "Playfair Display", serif; font-style: italic; }
+        .font-medieval { font-family: "MedievalSharp", cursive; }
+
+        #clock { font-size: 70px; }
+        #date { font-size: 30px; }
+        .event { margin-top: 8px; font-size: 26px; text-align: center; }
+
+        button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #1a1a1a;
+            color: inherit;
+            border: 2px solid currentColor;
+            border-radius: 8px;
+            transition: 0.3s;
+            text-shadow: 2px 2px 3px #000;
+        }
+        button:hover {
+            background: currentColor;
+            color: #121212;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .color-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; cursor: pointer;
+        }
+
+        /* Video Section Styles */
+        #video-player-container {
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: none;
+            border: 2px solid currentColor;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.5);
+        }
+        video { width: 100%; border-radius: 5px; margin-bottom: 10px; }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .v-btn { font-size: 12px; padding: 5px; }
+
+        .progress-container {
+            width: 90%;
+            max-width: 600px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            height: 100%; width: 0%; transition: width 1s ease-in-out; background: currentColor;
+        }
+
+        .rainbow, .rainbow #clock, .rainbow #date, .rainbow .event { 
+            animation: rainbow-text 3s linear infinite; 
+        }
+        
+        body.rainbow button, body.rainbow .progress-bar {
+            animation: rainbow-text 3s linear infinite;
+            border-color: currentColor;
+            background: currentColor;
+        }
+
+        @keyframes rainbow-text {
+            0% { color: #FF0000; }
+            20% { color: #D4AF37; }
+            40% { color: #11d9f4; }
+            60% { color: #1af534; }
+            80% { color: #6b01db; }
+            100% { color: #FF0000; }
+        }
+
+        #full-schedule-container {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid currentColor;
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body class="font-default">
+    <div id="date">-- -- ----</div>
+    <div id="clock">00:00:00</div>
+
+    <div id="event" class="event"></div>
+    <div id="event2" class="event"></div>
+    <div class="progress-container"><div id="classProgress" class="progress-bar"></div></div>
+    <div id="classProgressText" class="event"></div>
+
+    <div id="event3" class="event"></div>
+    <div id="event4" class="event"></div>
+    <div class="event">Fin de la journée dans :</div>
+    <div id="event5" class="event"></div>
+    <div class="progress-container"><div id="dayProgress" class="progress-bar"></div></div>
+    <div id="dayProgressText" class="event"></div>
+
+    <div id="video-player-container">
+        <video id="mainVideo" controls>
+            <source id="videoSource" src="" type="video/mp4">
+            Votre navigateur ne supporte pas la lecture de vidéos.
+        </video>
+        <div id="videoTitle" class="event" style="font-size: 18px;">Sélectionnez une vidéo</div>
+    </div>
+
+    <button onclick="toggleElement('full-schedule-container')">📅 Voir l'emploi du temps complet</button>
+    
+    <div id="full-schedule-container" style="display: none;">
+        <h3 style="text-align: center; margin-top: 0;">Cours du jour</h3>
+        <div id="schedule-list"></div>
+    </div>
+
+    <div id="extra-progress-section">
+        <div class="event">Fin de la semaine dans :</div>
+        <div id="event6" class="event"></div>
+        <div class="progress-container"><div id="weekendProgress" class="progress-bar"></div></div>
+        <div id="weekendProgressText" class="event"></div>
+
+        <div class="event">Temps avant les vacances :</div>
+        <div id="vacationDays" class="event"></div>
+        <div class="progress-container"><div id="vacationProgress" class="progress-bar"></div></div>
+        <div id="vacationProgressText" class="event"></div>
+    </div>
+    <button onclick="toggleElement('extra-progress-section')">🏖️ Cacher/Afficher Stats Vacances</button>
+
+    <div id="controls-container">
+        <div id="main-menu">
+            <button onclick="showSubMenu('color-menu')">🎨 Colors</button>
+            <button onclick="showSubMenu('font-menu')">✍ Fonts</button>
+            <button onclick="showSubMenu('video-menu')">🎬 Videos</button>
+            <button onclick="toggleControls()">🙈 Hide Controls</button>
+            <button onclick="randomizeLook()">🎲 Surprise Me</button>
+        </div>
+
+        <div id="color-menu" style="display: none;">
+            <button onclick="toggleRainbow()">🌈 Rainbow Mode</button>
+            <button id="partyButton" onclick="togglePartyMode()">🥳 Party Mode</button>
+            <div class="color-grid">
+                <button class="color-btn" style="background: #067f26;" onclick="changeMainColor('#067f26')"></button>
+                <button class="color-btn" style="background: #0609c7;" onclick="changeMainColor('#0609c7')"></button>
+                <button class="color-btn" style="background: #6b01db;" onclick="changeMainColor('#6b01db')"></button>
+                <button class="color-btn" style="background: #11d9f4;" onclick="changeMainColor('#11d9f4')"></button>
+                <button class="color-btn" style="background: #1af534;" onclick="changeMainColor('#1af534')"></button>
+                <button class="color-btn" style="background: #FF0000;" onclick="changeMainColor('#FF0000')"></button>
+                <button class="color-btn" style="background: #D4AF37;" onclick="changeMainColor('#D4AF37')"></button>
+                <button class="color-btn" style="background: #800020;" onclick="changeMainColor('#800020')"></button>
+                <button class="color-btn" style="background: #ff69b4;" onclick="changeMainColor('#ff69b4')"></button>
+                <button class="color-btn" style="background: #ffa500;" onclick="changeMainColor('#ffa500')"></button>
+                <button class="color-btn" style="background: #ffffff;" onclick="changeMainColor('#ffffff')"></button>
+                <button class="color-btn" style="background: #808080;" onclick="changeMainColor('#808080')"></button>
+            </div>
+            <button onclick="showSubMenu('main-menu')">⬅ Back</button>
+        </div>
+
+        <div id="font-menu" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <button onclick="changeFont('font-default')">Standard</button>
+                <button onclick="changeFont('font-sci-fi')">Orbitron</button>
+                <button onclick="changeFont('font-hand')">Patrick Hand</button>
+                <button onclick="changeFont('font-retro')">8-Bit</button>
+                <button onclick="changeFont('font-comic')">Comic</button>
+                <button onclick="changeFont('font-mono')">Coding</button>
+                <button onclick="changeFont('font-hacker')">Hacker</button>
+                <button onclick="changeFont('font-horror')">Horror</button>
+                <button onclick="changeFont('font-fancy')">Fancy</button>
+                <button onclick="changeFont('font-medieval')">Medieval</button>
+            </div>
+            <button onclick="showSubMenu('main-menu')" style="margin-top:15px;">⬅ Back</button>
+        </div>
+
+        <div id="video-menu" style="display: none;">
+            <div class="video-grid" id="video-list-buttons">
+                </div>
+            <button onclick="stopVideo()" style="width:100%">⏹️ Stop & Hide Player</button>
+            <button onclick="showSubMenu('main-menu')" style="margin-top:15px;">⬅ Back</button>
+        </div>
+    </div>
+
+    <button id="show-btn" onclick="toggleControls()" style="display: none;">🛠 Show Controls</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        const schedule = {
+            "Lundi": [
+                { start: "08:00", end: "09:55", text: "Physique (A570)" },
+                { start: "09:55", end: "10:10", text: "Pause 9h55->10h10" },
+                { start: "10:10", end: "11:05", text: "Culture G (G612)" },
+                { start: "13:10", end: "13:40", text: "Informatique M (A520)" },
+                { start: "13:40", end: "15:05", textA: "Informatique M (A520)", textB: "Informatique Br (A503)" },
+                { start: "15:15", end: "16:10", textA: "Informatique M (A520)", textB: "Informatique Br (A503)" }
+            ],
+            "Mardi": [
+                { start: "08:00", end: "08:55", text: "Physique (A567)" },
+                { start: "09:00", end: "09:55", text: "Math (C302)" },
+                { start: "10:10", end: "12:05", text: "Culture G (A412)" },
+                { start: "13:10", end: "13:40", text: "Informatique M (A520)" },
+                { start: "13:40", end: "15:05", textA: "Informatique Be (A503)", textB: "Informatique M (A520)" },
+                { start: "15:15", end: "16:10", textA: "Informatique Be (A503)", textB: "Informatique M (A520)" }
+            ],
+            "Mercredi": [
+                { start: "08:00", end: "08:55", text: "Anglais spécial (A520)" },
+                { start: "09:00", end: "09:55", text: "AP disciplinaire (A520)" },
+                { start: "10:10", end: "12:05", text: "Physique (A566)" },
+                { start: "12:10", end: "13:05", text: "Co-math (A520)" },
+                { start: "14:10", end: "15:05", text: "Anglais (G605)" },
+                { start: "15:15", end: "16:10", text: "Math (C502)" }
+            ],
+            "Jeudi": [
+                { start: "08:00", end: "08:55", text: "Physique (A567)" },
+                { start: "09:00", end: "12:05", text: "Informatique Br (A520)" },
+                { start: "14:10", end: "15:05", text: "Anglais (C207)" }
+            ],
+            "Vendredi": [
+                { start: "09:00", end: "12:05", text: "Informatique Be (A520/A503)" },
+                { start: "12:10", end: "13:05", text: "Physique (A567)" }
+            ]
+        };
+
+        const vacations = [
+            { start: new Date(2026, 1, 21) }, 
+            { start: new Date(2026, 3, 19) }, 
+            { start: new Date(2026, 4, 14) }
+        ];
+
+        // --- Video Logic ---
+        const videoCount = 19;
+        const videoListDiv = document.getElementById('video-list-buttons');
+        for(let i=1; i<=videoCount; i++) {
+            let btn = document.createElement('button');
+            btn.className = "v-btn";
+            btn.textContent = "Vid " + i;
+            btn.onclick = () => playVideo(`video${i}.mp4`, "Vidéo " + i);
+            videoListDiv.appendChild(btn);
+        }
+
+        function playVideo(file, title) {
+            const container = document.getElementById('video-player-container');
+            const video = document.getElementById('mainVideo');
+            const source = document.getElementById('videoSource');
+            const titleEl = document.getElementById('videoTitle');
+            
+            container.style.display = "block";
+            source.src = file;
+            titleEl.textContent = title;
+            video.load();
+            video.play();
+        }
+
+        function stopVideo() {
+            const container = document.getElementById('video-player-container');
+            const video = document.getElementById('mainVideo');
+            video.pause();
+            container.style.display = "none";
+        }
+
+        function timeToSeconds(t) {
+            const [h, m] = t.split(":").map(Number);
+            return h * 3600 + m * 60;
+        }
+
+        function formatTime(sec) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = sec % 60;
+            return `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+        }
+
+        function getWeekType() {
+            const start = new Date(2024, 8, 2);
+            const diff = Math.floor((new Date() - start) / (1000 * 60 * 60 * 24 * 7));
+            return diff % 2 === 0 ? "a" : "b";
+        }
+
+        function toggleElement(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === "none") ? "block" : "none";
+        }
+
+        function changeMainColor(hex) {
+            document.body.classList.remove("rainbow");
+            partyMode = false;
+            clearInterval(partyInt);
+            document.getElementById("partyButton").textContent = "🥳 Party Mode";
+
+            document.body.style.color = hex;
+            document.querySelectorAll('button, .event, .progress-bar, #clock, #date, #video-player-container').forEach(el => {
+                if (!el.classList.contains('color-btn')) {
+                    if (el.classList.contains('progress-bar')) el.style.background = hex;
+                    else el.style.color = hex;
+                    
+                    if (el.tagName === 'BUTTON' || el.id === 'full-schedule-container' || el.id === 'video-player-container') {
+                        el.style.borderColor = hex;
+                    }
+                }
+            });
+        }
+
+        function clearManualStyles() {
+            document.body.style.color = "";
+            document.querySelectorAll('button, .event, .progress-bar, #clock, #date, #full-schedule-container, #video-player-container').forEach(el => {
+                if (!el.classList.contains('color-btn')) {
+                    el.style.color = "";
+                    el.style.borderColor = "";
+                    el.style.background = "";
+                }
+            });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+            const jourNom = jours[now.getDay()];
+            const week = getWeekType();
+
+            document.getElementById("clock").textContent = formatTime(nowSec);
+            document.getElementById("date").textContent = `${jourNom} ${now.getDate()} ${now.toLocaleDateString('fr-FR', {month:'long'})} ${now.getFullYear()}`;
+
+            const todaySchedule = schedule[jourNom] || [];
+            let current = todaySchedule.find(c => nowSec >= timeToSeconds(c.start) && nowSec < timeToSeconds(c.end));
+            let next = todaySchedule.find(c => timeToSeconds(c.start) > nowSec);
+
+            if (current) {
+                const text = current.textA ? (week === "a" ? current.textA : current.textB) : current.text;
+                const rem = timeToSeconds(current.end) - nowSec;
+                document.getElementById("event").textContent = "Cours en cours : " + text;
+                document.getElementById("event2").textContent = "Fin dans : " + formatTime(rem);
+                const perc = ((nowSec - timeToSeconds(current.start)) / (timeToSeconds(current.end) - timeToSeconds(current.start))) * 100;
+                document.getElementById("classProgress").style.width = perc + "%";
+                document.getElementById("classProgressText").textContent = `Cours : ${perc.toFixed(1)}%`;
+            } else {
+                document.getElementById("event").textContent = "Pas de cours en ce moment 🎉";
+                document.getElementById("event2").textContent = "";
+                document.getElementById("classProgress").style.width = "0%";
+                document.getElementById("classProgressText").textContent = "";
+            }
+
+            if (next) {
+                const text = next.textA ? (week === "a" ? next.textA : next.textB) : next.text;
+                document.getElementById("event3").textContent = "Prochain cours : " + text;
+                document.getElementById("event4").textContent = "Dans : " + formatTime(timeToSeconds(next.start) - nowSec);
+            } else {
+                document.getElementById("event3").textContent = "Pas de prochain cours 🎉";
+                document.getElementById("event4").textContent = "";
+            }
+
+            if(todaySchedule.length > 0) {
+                const last = timeToSeconds(todaySchedule[todaySchedule.length-1].end);
+                const first = timeToSeconds(todaySchedule[0].start);
+                const dayPerc = Math.min(100, Math.max(0, ((nowSec - first) / (last - first)) * 100));
+                document.getElementById("dayProgress").style.width = dayPerc + "%";
+                document.getElementById("dayProgressText").textContent = `Journée : ${dayPerc.toFixed(1)}%`;
+                document.getElementById("event5").textContent = (last > nowSec) ? formatTime(last - nowSec) : "Journée terminée 🎉";
+            } else {
+                document.getElementById("event5").textContent = "Pas de cours aujourd'hui";
+            }
+
+            const endOfWeek = new Date(now);
+            endOfWeek.setDate(now.getDate() + (5 - now.getDay()));
+            endOfWeek.setHours(13, 5, 0);
+            const diffWeek = Math.max(0, Math.floor((endOfWeek - now) / 1000));
+            document.getElementById("event6").textContent = diffWeek > 0 ? formatTime(diffWeek) : "Semaine terminée 🎉";
+            let weekPerc = Math.min(100, Math.max(0, ((now.getDay()-1 + (nowSec/86400))/4.2)*100));
+            document.getElementById("weekendProgress").style.width = weekPerc + "%";
+            document.getElementById("weekendProgressText").textContent = `Semaine : ${weekPerc.toFixed(1)}%`;
+
+            const nextVac = vacations.find(v => v.start > now);
+            if(nextVac) {
+                const days = Math.ceil((nextVac.start - now) / (1000*60*60*24));
+                document.getElementById("vacationDays").textContent = days + " jour(s)";
+                const startSem = new Date(2026, 0, 5);
+                let vacPerc = Math.min(100, Math.max(0, ((now - startSem) / (nextVac.start - startSem)) * 100));
+                document.getElementById("vacationProgress").style.width = vacPerc + "%";
+                document.getElementById("vacationProgressText").textContent = `Progrès : ${vacPerc.toFixed(1)}%`;
+            }
+
+            const listContainer = document.getElementById("schedule-list");
+            listContainer.innerHTML = todaySchedule.map(c => {
+                const start = timeToSeconds(c.start);
+                const end = timeToSeconds(c.end);
+                const text = c.textA ? (week === "a" ? c.textA : c.textB) : c.text;
+                let activeStyle = (nowSec >= start && nowSec < end) ? "border-left: 4px solid currentColor; padding-left: 10px; font-weight: bold; background: rgba(255,255,255,0.1);" : (nowSec > end ? "opacity: 0.3;" : "");
+                return `<div style="margin-bottom: 8px; ${activeStyle}">${c.start} - ${c.end} : ${text}</div>`;
+            }).join("");
+        }
+
+        function showSubMenu(id) {
+            ['main-menu', 'color-menu', 'font-menu', 'video-menu'].forEach(m => document.getElementById(m).style.display = (m === id) ? "block" : "none");
+        }
+        function toggleControls() {
+            const c = document.getElementById("controls-container"), s = document.getElementById("show-btn");
+            c.style.display = (c.style.display === "none" ? "block" : "none");
+            s.style.display = (c.style.display === "none" ? "block" : "none");
+        }
+        function changeFont(f) {
+            const all = ['font-default', 'font-sci-fi', 'font-hand', 'font-retro', 'font-comic', 'font-mono', 'font-hacker', 'font-horror', 'font-fancy', 'font-medieval'];
+            all.forEach(cls => document.body.classList.remove(cls));
+            document.body.classList.add(f);
+        }
+
+        function toggleRainbow() { 
+            const isRainbow = document.body.classList.toggle("rainbow");
+            if(isRainbow) clearManualStyles();
+            else changeMainColor('#1af534');
+        }
+
+        let partyMode = false, partyInt;
+        function togglePartyMode() {
+            partyMode = !partyMode;
+            const btn = document.getElementById("partyButton");
+            if(partyMode) {
+                document.body.classList.add("rainbow");
+                clearManualStyles();
+                btn.textContent = "🎉 Party ON";
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+                partyInt = setInterval(() => confetti({ particleCount: 50, spread: 360, origin: { x: Math.random(), y: Math.random() - 0.2 } }), 2000);
+            } else {
+                document.body.classList.remove("rainbow");
+                clearInterval(partyInt);
+                btn.textContent = "🥳 Party Mode";
+                changeMainColor('#1af534');
+            }
+        }
+
+        function randomizeLook() {
+            const fonts = ['font-sci-fi', 'font-hand', 'font-retro', 'font-horror', 'font-medieval'];
+            const colors = ['#1af534', '#11d9f4', '#FF0000', '#D4AF37', '#6b01db'];
+            changeFont(fonts[Math.floor(Math.random()*fonts.length)]);
+            changeMainColor(colors[Math.floor(Math.random()*colors.length)]);
+        }
+
+        setInterval(updateClock, 100);
+        updateClock();
+    </script>
+</body>
+</html>
