@@ -234,40 +234,60 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script>
         const schedule = {
-            "Lundi": [
-                { start: "08:00", end: "09:00", text: "Informatique P (A520)" },
-                { start: "09:00", end: "09:55", text: "Informatique P (A520)" },
-                { start: "09:55", end: "10:10", text: "Pause 9h55->10h10" },
-                { start: "10:10", end: "12:10", text: "Informatique P (A520)" },
-                { start: "13:10", end: "13:40", text: "" },
-                { start: "13:40", end: "15:05", textA: "Informatique M (A520)", textB: "Informatique Br (A503)" },
-                { start: "15:15", end: "16:10", textA: "Informatique M (A520)", textB: "Informatique Br (A503)" }
-            ],
-            "Mardi": [
-                { start: "08:00", end: "08:55", text: "Physique (A567)" },
-                { start: "09:00", end: "09:55", text: "Math (C302)" },
-                { start: "10:10", end: "12:05", text: "Culture G (A412)" },
-                { start: "13:10", end: "13:40", text: "Informatique M (A520)" },
-                { start: "13:40", end: "15:05", textA: "Informatique Be (A503)", textB: "Informatique M (A520)" },
-                { start: "15:15", end: "16:10", textA: "Informatique Be (A503)", textB: "Informatique M (A520)" }
-            ],
-            "Mercredi": [
-                { start: "08:00", end: "08:55", text: "Anglais spécial (A520)" },
-                { start: "09:00", end: "09:55", text: "AP disciplinaire (A520)" },
-                { start: "10:10", end: "12:05", text: "Physique (A566)" },
-                { start: "12:10", end: "13:05", text: "Co-math (A520)" },
-                { start: "14:10", end: "15:05", text: "Anglais (G605)" },
-                { start: "15:15", end: "16:10", text: "Math (C502)" }
-            ],
-            "Jeudi": [
-                { start: "08:00", end: "08:55", text: "Physique (A567)" },
-                { start: "09:00", end: "12:05", text: "Informatique Br (A520)" },
-                { start: "14:10", end: "15:05", text: "Anglais (C207)" }
-            ],
-            "Vendredi": [
-                { start: "09:00", end: "12:05", text: "Informatique Be (A520/A503)" },
-                { start: "12:10", end: "13:05", text: "Physique (A567)" }
-            ]
+    "Lundi": [
+        { start: "08:00", end: "09:00", text: "Informatique P (A520)" },
+        { start: "09:00", end: "09:55", text: "Informatique P (A520)" },
+        { start: "09:55", end: "10:10", text: "Pause 9h55->10h10" },
+        { start: "10:10", end: "12:10", text: "Informatique P (A520)" },
+        { start: "12:10", end: "13:10", text: "Pause 12h10->13h10" },
+        { start: "13:10", end: "14:10", text: "Anglais (G602)" },
+        { start: "14:10", end: "15:05", text: "Math (G410)" },
+        { start: "15:05", end: "15:15", text: "Pause 15h05->15h15" },
+        { start: "15:15", end: "16:15", text: "Math (G410)" },
+        /*{
+            start: "13:40", end: "15:05",
+            textB: "Informatique Br (A503)",
+            textA: "Informatique M (A520)"
+        },*/
+    ],
+    "Mardi": [
+        { start: "08:00", end: "09:00", text: "Informatique M (A520)" },
+        { start: "09:00", end: "09:55", text: "Informatique M (A520)" },
+        { start: "09:55", end: "10:10", text: "Pause 9h55->10h10" },
+        { start: "10:10", end: "12:10", text: "Informatique M (A520)" },
+        { start: "12:10", end: "13:10", text: "Pause 12h10->13h10" },
+        { start: "13:10", end: "14:10", text: "AP disciplinaire (A520)" },
+        { start: "14:10", end: "15:05", text: "Physique (A568)" },
+        { start: "15:05", end: "15:15", text: "Pause 15h05->15h15" },
+        { start: "15:15", end: "16:15", text: "Math (A402)" },
+    ],
+    "Mercredi": [
+        { start: "08:00", end: "09:55", text: "Physique (A566)" },
+        { start: "09:55", end: "10:10", text: "Pause 9h55->10h10" },
+        { start: "10:10", end: "11:10", text: "Anglais special (A520)" },
+        { start: "11:10", end: "12:10", text: "Culture G (A412)" },
+        { start: "12:10", end: "14:10", text: "Pause 12h10->14h10" },
+        { start: "14:10", end: "15:05", text: "Co Math (A520)" },
+    ],
+    "Jeudi": [
+        { start: "08:00", end: "09:00", text: "Math (G502)" },
+        { start: "09:00", end: "09:55", text: "Anglais (C305)" },
+        { start: "09:55", end: "10:10", text: "Pause 9h55->10h10" },
+        { start: "10:10", end: "12:10", text: "Culture G (A415)" },
+        { start: "12:10", end: "13:10", text: "Pause 12h10->13h10" },
+        { start: "13:10", end: "14:10", text: "Informatique Be (A520)" },
+        { start: "14:10", end: "15:05", text: "Informatique Br (A503)" },
+        { start: "15:05", end: "15:15", text: "Pause 15h05->15h15" },
+        { start: "15:15", end: "17:15", text: "Informatique Br (A503)" },
+    ],
+    "Vendredi": [
+        { start: "10:10", end: "12:10", text: "Physique (A570)" },
+        { start: "12:10", end: "13:10", text: "Pause 12h10->13h10" },
+        { start: "13:10", end: "14:10", text: "Informatique Br (A520)" },
+        { start: "14:10", end: "15:05", text: "Informatique Be (A503)" },
+        { start: "15:05", end: "15:15", text: "Pause 15h05->15h15" },
+        { start: "15:15", end: "17:15", text: "Informatique Be (A503)" },
+    ]
         };
 
         const vacations = [
