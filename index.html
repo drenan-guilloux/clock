@@ -452,7 +452,7 @@
             if(nextVac) {
                 const days = Math.ceil((nextVac.start - now) / (1000*60*60*24));
                 document.getElementById("vacationDays").textContent = days + " jour(s)";
-                const startSem = new Date(2027, 0, 5);
+                const startSem = new Date(2026, 9, 2);
                 let vacPerc = Math.min(100, Math.max(0, ((now - startSem) / (nextVac.start - startSem)) * 100));
                 document.getElementById("vacationProgress").style.width = vacPerc + "%";
                 document.getElementById("vacationProgressText").textContent = `Progrès : ${vacPerc.toFixed(1)}%`;
