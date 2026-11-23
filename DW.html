@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mini Jeux</title>
+<style>
+body{font-family:Arial;background:#eef2f3;text-align:center;margin:0;padding:0;}
+.page{display:none;padding:20px}
+.active{display:block}
+button,select,input{padding:10px;margin:5px}
+.grid{display:grid;grid-template-columns:repeat(3,80px);gap:5px;justify-content:center}
+.cell{width:80px;height:80px;font-size:30px}
+.message{font-weight:bold;font-size:18px}
+canvas{background:black;display:block;margin:auto}
+#memory button{width:60px;height:60px;font-size:25px}
+.good{color:green}.bad{color:red}
+</style>
+</head>
+<body>
+
+<label for="musicInput">🎵 Choisissez une musique :</label>
+<input type="file" id="musicInput" accept="audio/*">
+<audio id="bgMusic" controls loop></audio>
+
+<script>
+const musicInput = document.getElementById("musicInput");
+const bgMusic = document.getElementById("bgMusic");
+let playlist = [];
+let current = 0;
+
+musicInput.addEventListener("change", e => {
+    playlist = Array.from(e.target.files); // Convertit en tableau
+    if(playlist.length > 0){
+        current = 0;
+        bgMusic.src = URL.createObjectURL(playlist[current]);
+        bgMusic.play();
+    }
+});
+
+// Passe à la musique suivante quand la musique actuelle se termine
+bgMusic.addEventListener("ended", () => {
+    if(playlist.length > 0){
+        current = (current + 1) % playlist.length; // boucle la playlist
+        bgMusic.src = URL.createObjectURL(playlist[current]);
+        bgMusic.play();
+    }
+});
+</script>
+
+<button onclick="toggleVideo()">Show/Hide Video</button>
+
+<br><br>
+
+<video id="myVideo" width="640" height="360" controls style="display: none;">
+  <source src="C:\Users\Public\idk\videoplayback.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<script>
+function toggleVideo() {
+  const video = document.getElementById("myVideo");
+  
+  // Check the current display state
+  if (video.style.display === "none") {
+    video.style.display = "block";
+  } else {
+    video.style.display = "none";
+    video.pause(); // Optional: pauses the video when hidden
+  }
+}
+</script>
+
+<!-- ACCUEIL -->
+<div id="home" class="page active">
+<h1>🎮 Mini Jeux</h1>
+<button onclick="openGame('number')">🔢 Nombre mystère</button>
+<button onclick="openGame('clicker')">🖱️ Clicker</button>
+<button onclick="openGame('morpion')">❌⭕ Morpion</button>
+<button onclick="openGame('pfc')">✊✋✌️ PFC</button>
+<button onclick="openGame('snakePage')">🐍 Snake</button>
+<button onclick="openGame('quizPage')">🧠 Quiz</button>
+<button onclick="openGame('memoryPage')">🃏 Memory</button>
+</div>
+
+<!-- NOMBRE MYSTERE -->
+<div id="number" class="page">
+<h2>🔢 Nombre mystère</h2>
+<select id="difficulty">
+<option value="10">Facile (1 à 10)</option>
+<option value="50">Moyen (1 à 50)</option>
+<option value="100">Difficile (1 à 100)</option>
+</select>
+<button onclick="startNumber()">Commencer</button><br>
+<input type="number" id="guess" placeholder="Votre nombre">
+<button onclick="checkNumber()">Tester</button>
+<p class="message" id="numberMsg"></p>
+<button onclick="startNumber()">🔄 Recommencer</button>
+<button onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<!-- CLICKER -->
+<div id="clicker" class="page">
+<h2>🖱️ Clicker</h2>
+<select id="clickerDifficulty">
+<option value="10">Facile</option>
+<option value="5">Moyen</option>
+<option value="3">Difficile</option>
+</select>
+<p>Temps : <span id="time">0</span></p>
+<p>Score : <span id="score">0</span></p>
+<p class="message" id="clickerMsg"></p>
+<button onclick="startClicker()">Démarrer</button>
+<button onclick="addPoint()">Clique !</button><br>
+<button onclick="startClicker()">🔄 Recommencer</button>
+<button onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<!-- MORPION -->
+<div id="morpion" class="page">
+<h2>❌⭕ Morpion vs Ordi</h2>
+<select id="morpionLevel">
+<option value="easy">🟢 Facile</option>
+<option value="medium">🟡 Moyen</option>
+<option value="hard">🔴 Difficile</option>
+<option value="unbeatable">🏆 Imbattable</option>
+</select>
+<div class="grid" id="board"></div>
+<p class="message" id="morpionMsg"></p>
+<button onclick="resetMorpion()">🔄 Recommencer</button>
+<button onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<!-- PFC -->
+<div id="pfc" class="page">
+<h2>✊✋✌️ Pierre-Feuille-Ciseaux</h2>
+<button onclick="pfc('pierre')">✊</button>
+<button onclick="pfc('feuille')">✋</button>
+<button onclick="pfc('ciseaux')">✌️</button>
+<p class="message" id="pfcMsg"></p>
+<button onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<!-- SNAKE -->
+<div id="snakePage" class="page">
+<h2>🐍 Snake</h2>
+<canvas id="snake" width="300" height="300"></canvas>
+<p class="message" id="snakeMsg"></p>
+<button onclick="resetSnake()">🔄 Recommencer</button>
+<button onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quizPage" class="page">
+<h2>🧠 Quiz</h2>
+<p id="question"></p>
+<button onclick="answer(true)">Vrai</button>
+<button onclick="answer(false)">Faux</button>
+<div id="quizResult"></div>
+<button onclick="startQuiz()">🔄 Recommencer</button>
+<button onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<!-- MEMORY -->
+<div id="memoryPage" class="page">
+<h2>🃏 Memory</h2>
+<select id="memoryLevel">
+<option value="6">Facile (6 cartes)</option>
+<option value="8">Moyen (8 cartes)</option>
+<option value="12">Difficile (12 cartes)</option>
+</select>
+<p id="memoryInfo"></p>
+<div id="memory"></div>
+<p class="message" id="memoryMsg"></p>
+<button onclick="startMemory()">🔄 Recommencer</button>
+<button onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<script>
+/* ===== VARIABLES DOM ===== */
+const difficulty=document.getElementById("difficulty");
+const numberMsg=document.getElementById("numberMsg");
+const guess=document.getElementById("guess");
+const clickerDifficulty=document.getElementById("clickerDifficulty");
+const clickerMsg=document.getElementById("clickerMsg");
+const boardDiv=document.getElementById("board");
+const morpionLevel=document.getElementById("morpionLevel");
+const pfcMsg=document.getElementById("pfcMsg");
+const snakeCanvas=document.getElementById("snake");
+const snakeMsg=document.getElementById("snakeMsg");
+const memory=document.getElementById("memory");
+const memoryMsg=document.getElementById("memoryMsg");
+const memoryLevel=document.getElementById("memoryLevel");
+const memoryInfo=document.getElementById("memoryInfo");
+
+/* ===== SON ===== */
+const winSound=document.getElementById("winSound");
+const loseSound=document.getElementById("loseSound");
+function playWin(){winSound.play();}
+function playLose(){loseSound.play();}
+
+/* NAVIGATION */
+function openGame(id){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+function goHome(){openGame('home')}
+
+/* ===== NOMBRE MYSTERE ===== */
+let secret;
+function startNumber(){
+let max=+difficulty.value;
+secret=Math.floor(Math.random()*max)+1;
+numberMsg.textContent=`🎯 Jeu lancé ! Choisissez un nombre entre 1 et ${max}`;
+}
+function checkNumber(){
+let g=+guess.value;
+if(!g){numberMsg.textContent="⚠️ Entrez un nombre valide";return;}
+if(g===secret){numberMsg.textContent="🎉 Gagné !";playWin();}
+else if(g>secret){numberMsg.textContent=`📈 Trop haut, entre 1 et ${difficulty.value}`;}
+else {numberMsg.textContent=`📉 Trop bas, entre 1 et ${difficulty.value}`;}
+}
+
+/* ===== CLICKER ===== */
+let score=0,time=0,timer;
+function startClicker(){
+score=0;time=+clickerDifficulty.value;document.getElementById('score').textContent=score;
+document.getElementById('time').textContent=time;
+clickerMsg.textContent="";
+clearInterval(timer);
+timer=setInterval(()=>{
+time--;document.getElementById('time').textContent=time;
+if(time<=0){clearInterval(timer);clickerMsg.textContent="💀 Game Over";playLose();}
+},1000);
+}
+function addPoint(){if(time>0){score++;document.getElementById('score').textContent=score;}}
+
+/* ===== MORPION ===== */
+let board;
+const winComb=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function resetMorpion(){
+board=["","","","","","","","",""];
+boardDiv.innerHTML="";morpionMsg.textContent="";
+board.forEach((_,i)=>{
+let b=document.createElement("button");
+b.className="cell";b.onclick=()=>playerMove(i,b);
+boardDiv.appendChild(b);
+});
+}
+function playerMove(i,b){
+if(board[i]||morpionMsg.textContent) return;
+board[i]="X";b.textContent="X";
+if(checkWin(board,"X")) return endMorpion("🎉 Gagné !");
+if(board.every(c=>c)) return endMorpion("🤝 Égalité");
+aiMove();
+}
+function aiMove(){
+let level=morpionLevel.value;
+let move;
+if(level==="easy"){move=randomMove();}
+else if(level==="medium"){move=smartMove();}
+else if(level==="hard"){move=minimaxMove();}
+else{move=minimaxMove(true);} // imbattable
+board[move]="O";
+boardDiv.children[move].textContent="O";
+if(checkWin(board,"O")) endMorpion("❌ Perdu");
+}
+function randomMove(){let e=board.map((c,i)=>c===""?i:null).filter(i=>i!==null);return e[Math.floor(Math.random()*e.length)];}
+function smartMove(){
+for(let i=0;i<9;i++){if(board[i]===""){board[i]="O";if(checkWin(board,"O")){board[i]="";return i;}board[i]="";}}
+for(let i=0;i<9;i++){if(board[i]===""){board[i]="X";if(checkWin(board,"X")){board[i]="";return i;}board[i]="";}}
+return randomMove();
+}
+function minimaxMove(imbattable=false){
+function minimax(b,isMax,d){
+if(checkWin(b,"O")) return 10-d;
+if(checkWin(b,"X")) return d-10;
+if(b.every(c=>c)) return 0;
+let scores=[];
+for(let i=0;i<9;i++){
+if(b[i]===""){b[i]=isMax?"O":"X";scores.push(minimax(b,!isMax,d+1));b[i]="";}
+}
+return isMax?Math.max(...scores):Math.min(...scores);
+}
+let best=-Infinity,move;
+for(let i=0;i<9;i++){
+if(board[i]===""){
+board[i]="O";
+let score=minimax(board,!imbattable?false:true,0);
+board[i]="";
+if(score>best){best=score;move=i;}
+}
+}
+return move;
+}
+function checkWin(b,p){return winComb.some(w=>w.every(i=>b[i]===p))}
+function endMorpion(m){morpionMsg.textContent=m;if(m.includes("Gagné")) playWin(); else if(m.includes("Perdu")) playLose();}
+resetMorpion();
+
+/* ===== PFC ===== */
+function pfc(c){
+let a=["pierre","feuille","ciseaux"][Math.floor(Math.random()*3)];
+let r="🤝 Égalité";
+if((c==="pierre"&&a==="ciseaux")||(c==="feuille"&&a==="pierre")||(c==="ciseaux"&&a==="feuille")) {r="🎉 Gagné";playWin();}
+else if(c!==a){r="❌ Perdu";playLose();}
+pfcMsg.textContent=`Toi: ${c} | Ordi: ${a} → ${r}`;
+}
+
+/* ===== SNAKE ===== */
+let snake,dx,dy,food,loop;
+document.addEventListener("keydown",e=>{
+if(e.key==="ArrowUp"&&dy===0){dx=0;dy=-10}
+if(e.key==="ArrowDown"&&dy===0){dx=0;dy=10}
+if(e.key==="ArrowLeft"&&dx===0){dx=-10;dy=0}
+if(e.key==="ArrowRight"&&dx===0){dx=10;dy=0}
+});
+function resetSnake(){
+snake=[{x:150,y:150}];dx=10;dy=0;
+food={x:Math.floor(Math.random()*30)*10,y:Math.floor(Math.random()*30)*10};
+snakeMsg.textContent="";
+clearInterval(loop);
+loop=setInterval(drawSnake,150);
+}
+function drawSnake(){
+const ctx=snakeCanvas.getContext("2d");
+ctx.clearRect(0,0,300,300);
+let h={x:snake[0].x+dx,y:snake[0].y+dy};
+if(h.x<0||h.y<0||h.x>=300||h.y>=300 || snake.some(s=>s.x===h.x && s.y===h.y)){
+snakeMsg.textContent="💀 Game Over";clearInterval(loop);playLose();return;}
+snake.unshift(h);
+ctx.fillStyle="lime";snake.forEach(p=>ctx.fillRect(p.x,p.y,10,10));
+ctx.fillStyle="red";ctx.fillRect(food.x,food.y,10,10);
+if(h.x===food.x&&h.y===food.y){food={x:Math.floor(Math.random()*30)*10,y:Math.floor(Math.random()*30)*10};}else snake.pop();
+}
+resetSnake();
+
+/* ===== QUIZ ===== */
+const questions=[
+{q:"JavaScript est un langage ?",a:true},
+{q:"HTML est un langage de programmation ?",a:false},
+{q:"CSS sert au style ?",a:true},
+{q:"Un tableau commence à 1 ?",a:false},
+{q:"JS fonctionne côté client ?",a:true}
+];
+let qi,user=[];
+function startQuiz(){qi=0;user=[];quizResult.innerHTML="";showQ();}
+function showQ(){question.textContent=questions[qi].q;}
+function answer(a){user.push(a);qi++;if(qi>=questions.length) showResult();else showQ();}
+function showResult(){
+let s=0;quizResult.innerHTML="<h3>Résultat</h3>";
+questions.forEach((q,i)=>{
+if(user[i]===q.a){s++;quizResult.innerHTML+=`<p class="good">✔ ${q.q}</p>`;}
+else{quizResult.innerHTML+=`<p class="bad">❌ ${q.q} (réponse : ${q.a?"Vrai":"Faux"})</p>`; playLose();}
+});
+quizResult.innerHTML+=`<h4>Score : ${s}/${questions.length}</h4>`;
+if(s===questions.length) playWin();
+}
+startQuiz();
+
+/* ===== MEMORY ===== */
+let lock=false, firstCard=null, secondCard=null;
+function startMemory(){
+memory.innerHTML="";memoryMsg.textContent="";memoryInfo.textContent="";
+lock=false;firstCard=null;secondCard=null;
+let n=+memoryLevel.value;
+memoryInfo.textContent=`Nombre de cartes : ${n}`;
+let icons=["🐶","🐱","🐸","🐵","🐼","🦊"];
+let cards=icons.slice(0,n/2).flatMap(i=>[i,i]).sort(()=>0.5-Math.random());
+let found=0;
+cards.forEach(icon=>{
+let btn=document.createElement("button");
+btn.textContent="❓";
+btn.onclick=()=>{
+if(lock || btn===firstCard || btn.textContent!=="❓") return;
+btn.textContent=icon;
+if(!firstCard){firstCard=btn;}
+else{
+secondCard=btn;lock=true;
+if(firstCard.textContent===secondCard.textContent){
+found+=2;resetTurn();if(found===cards.length){memoryMsg.textContent="🎉 Gagné !";playWin();}
+}else{setTimeout(()=>{firstCard.textContent="❓";secondCard.textContent="❓";resetTurn();},700);}
+}
+};
+memory.appendChild(btn);
+});
+}
+function resetTurn(){[firstCard,secondCard]=[null,null];lock=false;}
+startMemory();
+
+</script>
+</body>
+</html>
+
+
