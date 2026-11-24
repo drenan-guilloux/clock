@@ -259,7 +259,7 @@
                 <button onclick="changeFont('font-horror')">Horror</button>
                 <button onclick="changeFont('font-fancy')">Fancy</button>
                 <button onclick="changeFont('font-medieval')">Medieval</button>
-				<button onclick="changeFont('CustomWingdings')">Wingdings</button>
+				<button onclick="changeFont('font-wingdings')">Wingdings</button>
             </div>
             <button onclick="showSubMenu('main-menu')" style="margin-top:15px;">⬅ Back</button>
         </div>
@@ -551,7 +551,7 @@
         }
 
         function randomizeLook() {
-            const fonts = ['font-sci-fi', 'font-hand', 'font-retro', 'font-horror', 'font-medieval', 'font-default', 'font-comic', 'font-mono', 'font-hacker', 'font-fancy'];
+            const fonts = ['font-sci-fi', 'font-hand', 'font-retro', 'font-horror', 'font-medieval', 'font-default', 'font-comic', 'font-mono', 'font-hacker', 'font-fancy', 'font-wingdings'];
             const colors = ['#1af534', '#11d9f4', '#FF0000', '#D4AF37', '#6b01db', '#067f27', '#0609c7', '#800020', '#ff69b4', '#ffa500', '#ffffff', '#808080'];
             changeFont(fonts[Math.floor(Math.random()*fonts.length)]);
             changeMainColor(colors[Math.floor(Math.random()*colors.length)]);
