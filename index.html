@@ -10,6 +10,7 @@
     <title>Clock & Video Player</title>
     <link rel="icon" type="image/png" href="Logo.png">
     <link rel="icon" type="image/png" href="Logo.png" />
+	<link href="https://googleapis.com" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Patrick+Hand&family=Fira+Code&family=Bangers&family=Press+Start+2P&family=VT323&family=Creepster&family=Playfair+Display:ital,wght@0,700;1,700&family=MedievalSharp&display=swap');
 
@@ -26,6 +27,12 @@
             transition: 0.3s;
             overflow-y: auto;
         }
+		
+		@font-face {
+		  font-family: 'CustomWingdings';
+		  src: url('wingdings.woff2') format('woff2'),
+			   url('wingdings.ttf') format('truetype');
+		}
 
         /* Font Classes */
         .font-default { font-family: "Segoe UI", sans-serif; }
@@ -38,6 +45,7 @@
         .font-horror { font-family: "Creepster", system-ui; }
         .font-fancy { font-family: "Playfair Display", serif; font-style: italic; }
         .font-medieval { font-family: "MedievalSharp", cursive; }
+		.font-wingdings { font-family: 'CustomWingdings', 'Wingdings', sans-serif; }
 
         #clock { font-size: 70px; }
         #date { font-size: 30px; }
@@ -251,6 +259,7 @@
                 <button onclick="changeFont('font-horror')">Horror</button>
                 <button onclick="changeFont('font-fancy')">Fancy</button>
                 <button onclick="changeFont('font-medieval')">Medieval</button>
+				<button onclick="setFont('CustomWingdings')">Wingdings</button>
             </div>
             <button onclick="showSubMenu('main-menu')" style="margin-top:15px;">⬅ Back</button>
         </div>
